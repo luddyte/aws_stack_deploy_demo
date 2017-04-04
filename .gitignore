@@ -1,0 +1,8 @@
+node_modules
+*log
+.vagrant
+node_app/
+services/example.nomad
+deploy/.terraform
+deploy/terraform.tfvars
+deploy/vpc
