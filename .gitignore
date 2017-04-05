@@ -5,6 +5,8 @@ node_app/
 services/example.nomad
 deploy/.terraform
 deploy/terraform.tfvars
+deploy/terraform.tfstate
+deploy/terraform.tfstate.backup
 deploy/vpc
 deploy/index.html.tpl
 deploy/web_bootstrap.sh

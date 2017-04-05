@@ -45,12 +45,17 @@ resource "aws_instance" "web" {
     #private_key = "${file(var.key_path)}" # encrypted keys not supported, don't use
   }
 
-  provisioner "remote-exec" {
-    script = "files/bootstrap_puppet.sh"
+  provisioner "file" {
+    source      = "files/"
+    destination = "/tmp"
   }
 
   provisioner "remote-exec" {
-    script = "files/bootstrap_agent.sh"
+    inline = [
+     "chmod +x /tmp/bootstrap_puppet.sh /tmp/bootstrap_agent.sh",
+     "sudo /tmp/bootstrap_puppet.sh",
+     "sudo /tmp/bootstrap_agent.sh"
+     ]
   }
 }
 
@@ -80,21 +85,18 @@ resource "aws_instance" "db" {
     #private_key = "${file(var.key_path)}" # encrypted keys not supported, don't use
   }
 
-  provisioner "remote-exec" {
-    script = "files/bootstrap_puppet.sh"
-  }
-
-  provisioner "remote-exec" {
-    script = "files/bootstrap_agent.sh"
-  }
-
-  provisioner "remote-exec" {
-    script = "files/bootstrap_db.sh"
-  }
-
   provisioner "file" {
-    source      = "../files/"
-    destination = "~/services"
+    source      = "files/"
+    destination = "/tmp"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+     "chmod +x /tmp/bootstrap_puppet.sh /tmp/bootstrap_agent.sh /tmp/bootstrap_db.sh",
+     "sudo /tmp/bootstrap_puppet.sh",
+     "sudo /tmp/bootstrap_agent.sh",
+     "sudo /tmp/bootstrap_db.sh"
+     ]
   }
 }
 
@@ -123,12 +125,22 @@ resource "aws_instance" "server" {
     agent = true     # use ssh_agent
   }
 
-  provisioner "remote-exec" {
-    script = "files/bootstrap_puppet.sh"
+  provisioner "file" {
+    source      = "files/"
+    destination = "/tmp"
   }
 
   provisioner "remote-exec" {
-    script = "files/bootstrap_server.sh"
+    inline = [
+     "chmod +x /tmp/bootstrap_puppet.sh bootstrap_server.sh",
+     "sudo /tmp/bootstrap_puppet.sh",
+     "sudo /tmp/bootstrap_server.sh"
+     ]
+  }
+
+  provisioner "file" {
+    source      = "../services/"
+    destination = "~/jobs"
   }
 }
 

@@ -13,6 +13,6 @@ file_line { "add metadata":
   match => '/client/',
   after => '"client": {'
 }
-"EOF"
+EOF
 
-sudo /opt/puppetlabs/puppet/bin/puppet apply /tmp.pp
+sudo /opt/puppetlabs/puppet/bin/puppet apply /tmp/db.pp

@@ -22,7 +22,7 @@ class { '::consul':
   },
   require => File[$conf_dir],
 }
-"EOF"
+EOF
 
 cat > /tmp/nomad_agent.pp << "EOF"
 $conf_dir = '/etc/nomad.d'
@@ -61,7 +61,7 @@ class { '::nomad':
   },
   require => File[$conf_dir],
 }
-"EOF"
+EOF
 
 sudo /opt/puppetlabs/bin/puppet apply /tmp/consul_agent.pp
 sudo /opt/puppetlabs/bin/puppet apply /tmp/nomad_agent.pp

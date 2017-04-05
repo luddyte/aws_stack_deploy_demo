@@ -18,8 +18,8 @@ variable "ami" {
 
   # Ubuntu 16.04
   default = {
-    us-east-1 = "ami-bcd95caa"
-    us-west-1 = "ami-e1095381"
+    us-east-1 = "ami-4dd2575b"
+    us-west-1 = "ami-e6095386"
   }
 }
 

@@ -57,7 +57,7 @@ class { '::nomad':
   },
   require => File[$conf_dir],
 }
-"EOF"
+EOF
 
 sudo /opt/puppetlabs/bin/puppet apply /tmp/consul_server.pp
 sudo /opt/puppetlabs/bin/puppet apply /tmp/nomad_server.pp
