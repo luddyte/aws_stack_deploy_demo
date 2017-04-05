@@ -6,3 +6,8 @@ services/example.nomad
 deploy/.terraform
 deploy/terraform.tfvars
 deploy/vpc
+deploy/index.html.tpl
+deploy/web_bootstrap.sh
+app/
+scripts
+notes

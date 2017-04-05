@@ -26,7 +26,6 @@ resource "aws_instance" "web" {
   subnet_id     = "${module.vpc.public_subnet_id}"
   private_ip    = "${var.web_ips[count.index]}"
 
-  #user_data                   = "${file("files/web_bootstrap.sh")}"
   associate_public_ip_address = true
 
   vpc_security_group_ids = [
@@ -46,18 +45,12 @@ resource "aws_instance" "web" {
     #private_key = "${file(var.key_path)}" # encrypted keys not supported, don't use
   }
 
-  #provisioner "file" {
-  #  content     = "${element(data.template_file.index.*.rendered, count.index)}"
-  #  destination = "/tmp/index.html"
-  #}
-
   provisioner "remote-exec" {
     script = "files/bootstrap_puppet.sh"
   }
+
   provisioner "remote-exec" {
-    inline = [
-      "sudo mv /tmp/index.html /var/www/html/index.html",
-    ]
+    script = "files/bootstrap_agent.sh"
   }
 }
 
@@ -68,7 +61,6 @@ resource "aws_instance" "db" {
   subnet_id     = "${module.vpc.public_subnet_id}"
   private_ip    = "${var.db_ips[count.index]}"
 
-  #user_data                   = "${file("files/web_bootstrap.sh")}"
   associate_public_ip_address = true
 
   vpc_security_group_ids = [
@@ -88,18 +80,21 @@ resource "aws_instance" "db" {
     #private_key = "${file(var.key_path)}" # encrypted keys not supported, don't use
   }
 
-  #provisioner "file" {
-  #  content     = "${element(data.template_file.index.*.rendered, count.index)}"
-  #  destination = "/tmp/index.html"
-  #}
-
   provisioner "remote-exec" {
     script = "files/bootstrap_puppet.sh"
   }
+
   provisioner "remote-exec" {
-    inline = [
-      "sudo mv /tmp/index.html /var/www/html/index.html",
-    ]
+    script = "files/bootstrap_agent.sh"
+  }
+
+  provisioner "remote-exec" {
+    script = "files/bootstrap_db.sh"
+  }
+
+  provisioner "file" {
+    source      = "../files/"
+    destination = "~/services"
   }
 }
 
@@ -110,7 +105,6 @@ resource "aws_instance" "server" {
   subnet_id     = "${module.vpc.public_subnet_id}"
   private_ip    = "${var.server_ips[count.index]}"
 
-  #user_data                   = "${file("files/web_bootstrap.sh")}"
   associate_public_ip_address = true
 
   vpc_security_group_ids = [
@@ -129,18 +123,12 @@ resource "aws_instance" "server" {
     agent = true     # use ssh_agent
   }
 
-  #provisioner "file" {
-  #  content     = "${element(data.template_file.index.*.rendered, count.index)}"
-  #  destination = "/tmp/index.html"
-  #}
-
   provisioner "remote-exec" {
     script = "files/bootstrap_puppet.sh"
   }
+
   provisioner "remote-exec" {
-    inline = [
-      "sudo mv /tmp/index.html /var/www/html/index.html",
-    ]
+    script = "files/bootstrap_server.sh"
   }
 }
 
@@ -150,9 +138,9 @@ resource "aws_elb" "web" {
   security_groups = ["${aws_security_group.web_inbound_sg.id}"]
 
   listener {
-    instance_port     = 80
+    instance_port     = 3000
     instance_protocol = "http"
-    lb_port           = 80
+    lb_port           = 3000
     lb_protocol       = "http"
   }
 
@@ -166,8 +154,8 @@ resource "aws_security_group" "web_inbound_sg" {
   vpc_id      = "${module.vpc.vpc_id}"
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -201,8 +189,8 @@ resource "aws_security_group" "web_host_sg" {
 
   # HTTP access from the VPC
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["${module.vpc.cidr}"]
   }
