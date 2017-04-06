@@ -3,8 +3,9 @@ job "dataservice" {
   type = "service"
 
   constraint {
-     attribute = "${attr.kernel.name}"
-     value     = "linux"
+     attribute = "${meta.role}"
+     operator  = "="
+     value     = "db"
   }
 
   update {
@@ -22,32 +23,25 @@ job "dataservice" {
       mode = "delay"
     }
 
-    ephemeral_disk {
-      migrate = true
-      size    = "500"
-      sticky  = true
-    }
-
     task "mongo" {
-      driver = "docker"
+      driver = "raw_exec"
       config {
-        image = "mongo:3.0.14"
-        port_map {
-          db = 27017
-        }
+        command = "/usr/bin/mongod"
+        args =["--config", "/etc/mongodb.conf", "--bind_ip", "0.0.0.0"]
       }
 
       resources {
-        cpu    = 500 # 500 MHz
-        memory = 256 # 256MB
         network {
           mbits = 10
-          port "db" {}
+          port "db" {
+            # maybe other applications consume this service, pin the port
+            static = "27017"
+          }
         }
       }
 
       service {
-        name = "mongodb_raw"
+        name = "mongodb"
         tags = ["global"]
         port = "db"
         check {

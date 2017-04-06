@@ -48,7 +48,7 @@ job "dataservice" {
       }
 
       service {
-        name = "mongodb_docker"
+        name = "mongodb"
         tags = ["global"]
         port = "db"
         check {

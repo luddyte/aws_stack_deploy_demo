@@ -16,3 +16,5 @@ file_line { "add metadata":
 EOF
 
 sudo /opt/puppetlabs/puppet/bin/puppet apply /tmp/db.pp
+
+sudo systemctl restart nomad

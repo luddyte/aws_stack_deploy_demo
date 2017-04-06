@@ -3,8 +3,8 @@ job "microservices_app" {
   type = "service"
 
   constraint {
-     attribute = "${attr.kernel.name}"
-     value     = "linux"
+     operator = "distinct_hosts"
+     value     = "true"
   }
 
   update {
@@ -13,7 +13,7 @@ job "microservices_app" {
   }
 
   group "app" {
-    count = 1
+    count = 3
 
     restart {
       attempts = 10
@@ -25,10 +25,11 @@ job "microservices_app" {
     task "nodeapp" {
       driver = "docker"
       config {
-        image = "node:latest"
+        image = "ehron/node_consul_demo"
         port_map {
           http = 3000
         }
+        network_mode = "host"
       }
 
       resources {
@@ -36,7 +37,7 @@ job "microservices_app" {
         memory = 256 # 256MB
         network {
           mbits = 10
-          port "3000" {}
+          port "http" {}
         }
       }
 
@@ -45,8 +46,9 @@ job "microservices_app" {
         tags = ["global"]
         port = "http"
         check {
-          name     = "alive"
-          type     = "tcp"
+          name     = "node_consul_app"
+          path     = "/health"
+          type     = "http"
           interval = "10s"
           timeout  = "2s"
         }

@@ -1,3 +1,7 @@
+output "application_address" {
+  value = "http://${aws_elb.web.dns_name}:3000"
+}
+
 output "elb_address" {
   value = "${aws_elb.web.dns_name}"
 }

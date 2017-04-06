@@ -132,18 +132,24 @@ resource "aws_instance" "server" {
     destination = "/tmp"
   }
 
+  provisioner "file" {
+    source      = "../services"
+    destination = "/tmp/services"
+  }
+
   provisioner "remote-exec" {
     inline = [
      "chmod +x /tmp/bootstrap_puppet.sh /tmp/bootstrap_server.sh",
      "sudo /tmp/bootstrap_puppet.sh",
-     "sudo /tmp/bootstrap_server.sh"
+     "sudo /tmp/bootstrap_server.sh",
+     "sudo mv /tmp/services/* /home/ubuntu",
+     "sleep 30",
+     "sudo nomad run /home/ubuntu/dataservice_raw.nomad",
+     "sudo nomad run /home/ubuntu/application.nomad"
      ]
   }
 
-  provisioner "file" {
-    source      = "../services"
-    destination = "~/"
-  }
+
 }
 
 resource "aws_elb" "web" {
@@ -159,7 +165,7 @@ resource "aws_elb" "web" {
   }
 
   # The instances are registered automatically
-  instances = ["${aws_instance.web.*.id}"]
+  instances = ["${aws_instance.web.*.id}", "${aws_instance.db.id}"]
 }
 
 resource "aws_security_group" "web_inbound_sg" {
