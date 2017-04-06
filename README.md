@@ -11,7 +11,7 @@ in a number of areas.
 The application stack is comprised of four Ubuntu 16.04 servers.  One of the
 servers runs both the Consul and Nomad server processes.  Only a single server
 is used for the purposes of this demo.  In production you would need three or
-five or data loss is inevitable.  
+five Consul and Nomad servers or data loss is inevitable.  
 
 Of the three remaining servers one hosts a locally installed Mongodb database.  
 The other two only have Docker installed locally.  All three servers will host
@@ -20,8 +20,7 @@ Consul to find the database server, and writes a record to the database each
 time the default route is visited.
 
 This configuration is intended to demonstrate how containerized microservices
-could theoretically consume an existing shared resource such as a database.  
-Using Nomad we can register this existing service (Mongodb in our case) making
+could theoretically consume an existing shared resource such as a database.  Using Nomad we can register this existing service (Mongodb in our case) making
 it available to our new microservice apps while remaining accessible to legacy
 applications that rely upon it.
 
@@ -46,5 +45,4 @@ deployed you can connect to application_address output value ('terraform output'
 to verify the app is functioning.  Please note that it may take a few minutes for
 the DNS record to propagate, and the page to become available using the ELB URL.
 
-When you are done with the resoures run 'terraform destroy' to clean up.  The
-resources
+When you are done with the resoures run 'terraform destroy' to clean up.
