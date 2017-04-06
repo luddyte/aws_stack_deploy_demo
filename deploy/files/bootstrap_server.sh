@@ -1,6 +1,7 @@
 #!/bin/bash
 cat >/tmp/consul_server.pp << "EOF"
 $conf_dir = '/etc/consul.d'
+$addr = $::facts['ipaddress']
 
 file{ $conf_dir:
   ensure => directory,
@@ -12,6 +13,7 @@ class { '::consul':
   version       => '0.7.5',
   config_hash => {
     'bootstrap_expect' => 1,
+    'bind_addr'        => $addr,
     'data_dir'         => '/opt/consul',
     'datacenter'       => 'local',
     'log_level'        => 'DEBUG',
@@ -27,10 +29,11 @@ EOF
 cat >/tmp/nomad_server.pp << "EOF"
 $conf_dir = '/etc/nomad.d'
 $sysconfig = '/etc/sysconfig'
+$addr = $::facts['ipaddress']
 
 file_line{"add nomad addr":
     path => '/etc/environment',
-    line => "NOMAD_ADDR=http://${$::facts['ipaddress']}:4646",
+    line => "NOMAD_ADDR=http://${addr}:4646",
 }
 
 file{ $conf_dir:

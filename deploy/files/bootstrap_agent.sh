@@ -2,6 +2,7 @@
 
 cat > /tmp/consul_agent.pp << "EOF"
 $conf_dir = '/etc/consul.d'
+$addr = $::facts['ipaddress']
 
 file{ $conf_dir:
   ensure => directory,
@@ -13,12 +14,14 @@ class { '::consul':
   version       => '0.7.5',
     config_hash => {
       'data_dir'       => '/opt/consul',
+      'bind_addr'      => $addr,
       'datacenter'     => 'local',
       'log_level'      => 'DEBUG',
-      'retry_join_ec2' => {
-        'tag_key'   => 'Role',
-        'tag_value' => 'server'
-      },
+      'retry_join'     => ['10.0.1.23'],
+      #'retry_join_ec2' => {
+      #  'tag_key'   => 'Role',
+      #  'tag_value' => 'server'
+      #},
   },
   require => File[$conf_dir],
 }
@@ -55,7 +58,10 @@ class { '::nomad':
       'enabled'    => true,
       'options'    => {
         'driver.raw_exec.enable' => '1'
-      }
+      },
+      'servers'    => [
+        '10.0.1.23:4647',
+      ],
       #'chroot_env' => $chroot_env
     }
   },

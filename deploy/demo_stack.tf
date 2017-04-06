@@ -52,6 +52,7 @@ resource "aws_instance" "web" {
 
   provisioner "remote-exec" {
     inline = [
+     "sleep 30",
      "chmod +x /tmp/bootstrap_puppet.sh /tmp/bootstrap_agent.sh",
      "sudo /tmp/bootstrap_puppet.sh",
      "sudo /tmp/bootstrap_agent.sh"
@@ -92,6 +93,7 @@ resource "aws_instance" "db" {
 
   provisioner "remote-exec" {
     inline = [
+     "sleep 30",
      "chmod +x /tmp/bootstrap_puppet.sh /tmp/bootstrap_agent.sh /tmp/bootstrap_db.sh",
      "sudo /tmp/bootstrap_puppet.sh",
      "sudo /tmp/bootstrap_agent.sh",
@@ -132,15 +134,15 @@ resource "aws_instance" "server" {
 
   provisioner "remote-exec" {
     inline = [
-     "chmod +x /tmp/bootstrap_puppet.sh bootstrap_server.sh",
+     "chmod +x /tmp/bootstrap_puppet.sh /tmp/bootstrap_server.sh",
      "sudo /tmp/bootstrap_puppet.sh",
      "sudo /tmp/bootstrap_server.sh"
      ]
   }
 
   provisioner "file" {
-    source      = "../services/"
-    destination = "~/jobs"
+    source      = "../services"
+    destination = "~/"
   }
 }
 
@@ -162,13 +164,22 @@ resource "aws_elb" "web" {
 
 resource "aws_security_group" "web_inbound_sg" {
   name        = "web_inbound"
-  description = "Allow HTTP from Anywhere"
+  description = "Allow web traffic from Anywhere"
   vpc_id      = "${module.vpc.vpc_id}"
 
+  # node_app
   ingress {
     from_port   = 3000
     to_port     = 3000
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  #consul UI
+  ingress {
+    from_port = 8500
+    to_port   = 8500
+    protocol  = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -189,7 +200,7 @@ resource "aws_security_group" "web_inbound_sg" {
 
 resource "aws_security_group" "web_host_sg" {
   name        = "web_host"
-  description = "Allow SSH & HTTP to web hosts"
+  description = "Allow all traffic between web hosts"
   vpc_id      = "${module.vpc.vpc_id}"
 
   ingress {
@@ -200,10 +211,24 @@ resource "aws_security_group" "web_host_sg" {
   }
 
   # HTTP access from the VPC
+  #ingress {
+  #  from_port   = 3000
+  #  to_port     = 3000
+  #  protocol    = "tcp"
+  #  cidr_blocks = ["${module.vpc.cidr}"]
+  #}
+
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
+    from_port = 0
+    to_port   = 65535
+    protocol  = "tcp"
+    cidr_blocks = ["${module.vpc.cidr}"]
+  }
+
+  ingress {
+    from_port = 0
+    to_port   = 65535
+    protocol  = "udp"
     cidr_blocks = ["${module.vpc.cidr}"]
   }
 

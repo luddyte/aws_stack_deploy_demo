@@ -27,7 +27,7 @@ job "microservices_app" {
       config {
         image = "node:latest"
         port_map {
-          http = 8080
+          http = 3000
         }
       }
 
@@ -36,7 +36,7 @@ job "microservices_app" {
         memory = 256 # 256MB
         network {
           mbits = 10
-          port "8080" {}
+          port "3000" {}
         }
       }
 
